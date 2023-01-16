@@ -10,4 +10,4 @@ Use this guide to setup your OS for pyspark - ![here](https://medium.com/@Galarn
 
 ## Contents
 
-1. [Functional Programming in Spark]()
+1. [Functional Programming in Spark]("./1-Functional-Programming-Spark")
