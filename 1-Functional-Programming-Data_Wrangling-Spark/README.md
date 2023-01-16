@@ -5,3 +5,10 @@ Under the hood, spark is written with a functional programming language called s
 ## PySpark
 
 Pyspark is a python API that was created to help interface with spark using the ame functional programming architecture.
+
+```
+
+# Install pyspark from pip
+pip install pyspark
+
+```
