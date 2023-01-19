@@ -361,3 +361,49 @@ Zeppelin is very similar to Jupyter Notebook, but if you want to use other langu
 
 3. ![](./images/spark-pic18.png)
 
+
+## What is a Spark Script
+Up until now, you have been using jupyter notebooks. Jupyter notebooks are great for prototyping, exploring and visualizing data and It is also shareable among colleagues and teams.
+However, Jupyter notebooks aren't the best for automating workflows.
+Python scripts are.
+
+## Submitting A Spark Script
+
+1. Download [`cities.csv`](./datasets/cities.csv) to your local machine
+2. Upload a file into an S3 location using the AWS S3 console, or you can use the AWS CLI command.
+  - create an s3 bucket using the command
+    ```
+    aws s3 mb s3://<bucket_name>
+    ```
+
+  - Copy `cities.csv` file to the s3 bucket using the command:
+l   ```
+    aws s3 cp <your current file location>/<csv-filename> s3://<bucket_name>
+    ```
+
+3. [Create an EMR](#create-emr-cluster-using-aws-cli)
+   
+   ![](./images/spark-pic22.png)
+
+4. copy this [Python script](./scripts/application.py) to to your EMR instance, preferably in your home directory of EMR instance (master node).
+  - use scp command to copy file from local machine to master node
+  Replace the private key with the path to your private key, the source file with the path to your sourcefile
+  ```
+  scp -i spark-cluster.pem ./scripts/application.py hadoop@<ec2-Publc_IPv4-address>:/home/hadoop/
+  ```
+  ![](./images/spark-pic24.png)
+
+  ![](./images/spark-pic23.png)
+
+5. ssh to the master node, and execute the file using
+  ```
+  spark-submit application.py.
+  ```
+  ![](./images/spark-pic21.png)
+
+  - View your spark UI and refresh the page:
+
+  ![](./images/spark-pic19.png)
+  
+  ![](./images/spark-pic19.png)
+
