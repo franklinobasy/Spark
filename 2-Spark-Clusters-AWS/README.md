@@ -43,8 +43,303 @@ HDFS uses MapReduce system as a resource manager to allow the distribution of th
 
 Spark, on the other hand, runs the operations and holds the data in the RAM memory rather than the hard drives used by HDFS. Since Spark lacks a file distribution system to organize, store and process data files, Spark tools are often installed on Hadoop because Spark can then use the Hadoop Distributed File System (HDFS).
 
+![](./images/spark_pic5.jpg)
+
 ### Why do you need EMR Cluster?
 Since a Spark cluster includes multiple machines, in order to use Spark code on each machine, we would need to download and install Spark and its dependencies. This is a manual process. **Elastic Map Reduce** is a service offered by AWS that negates the need for you, the user, to go through the manual process of installing Spark and its dependencies for each machine.
 
-### Setting up AWS
+### Setting up AWS EMR
 Please refer to the latest [AWS documentation to set up an EMR Cluster](https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-gs-launch-sample-cluster.html).
+
+## AWS Install and CLI configuration
+
+_The AWS Command Line Interface (AWS CLI) is a command-line tool that allows you to interact with AWS services using commands in your terminal/command prompt._
+
+AWS CLI enables you to run commands to provision, configure, list, delete resources in the AWS cloud. Before you run any of the aws commands, you need to follow three steps:
+
+- Install AWS CLI
+- Create an IAM user with Administrator permissions
+- Configure the AWS CLI
+
+
+## Create EMR Cluster Using AWS CLI
+
+Let's learn how to create an EMR cluster from the CLI, and configure the related settings.
+
+**`aws emr create-cluster` command**
+
+While creating EMR through AWS console has been shown, but if you know your instances' specificity, such as which applications you need or what kind of clusters you’ll need, you can reuse the aws emr create-cluster command below multiple times.
+
+```
+
+aws emr create-cluster --name <cluster_name> \
+ --use-default-roles --release-label emr-5.28.0  \
+--instance-count 3 --applications Name=Spark Name=Zeppelin  \
+--bootstrap-actions Path="s3://bootstrap.sh" \
+--ec2-attributes KeyName=<Key-pair-file-name>,SubnetId=<subnet-Id> \
+--instance-type m5.xlarge --log-uri s3:///emrlogs/
+
+```
+
+1. **Options**: Let’s break down the command above and go over each option.
+ - `--name` : You can give any name of your choice. This will show up on your AWS EMR UI.
+ - `--release-label`: This is the version of EMR you'd like to use.
+- `--instance-count`: Annotates instance count. One is for the primary, and the rest are for the secondary. For example, if --instance-count is given 4, then 1 instance will be reserved for primary, then 3 will be reserved for secondary instances.
+- `--applications`: List of applications you want to pre-install on your EMR at the launch time
+- `--bootstrap-actions`: The `Path` attribute provides the path to a file (residing in S3 or locally) that contains a script that runs during a bootstrap action. The script may set environmental variables in all the instances of the cluster. This file must be accessible to each instance in the cluster.
+- `--ec2-attributes`: The `KeyName` field specifies your key-pair file name, for example, if it is MyKey.pem, just specify `MyKey` for this field. There is one more field that you should specify, `v `.
+The [aws documentation](https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-managed-notebooks-considerations.html) says that the cluster must be launched within an EC2-VPC. Therefore, you need to provide the VPC subnet Id in which to create the cluster. If you do not specify this value, the cluster is launched in the normal AWS cloud, outside of any VPC. Go to the [VPC service](https://console.aws.amazon.com/vpc) in the web console to copy any of the subnet IDs within the [default VPC](https://docs.aws.amazon.com/vpc/latest/userguide/default-vpc.html#create-default-vpc). If you do not see a default VPC in your account, use a simple command to create a default VPC:
+
+```
+aws ec2 create-default-vpc --profile <profile-name>
+```
+
+See the snapshot below to copy the subnet Id.
+
+![](./images/spark-pic6.png)
+
+
+- `--instance-type`: Specify the type of instances you want to use. [Detailed list can be accessed here](https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-supported-instance-types.html), but find the one that can fit your data and your budget.
+- `--log-uri`: S3 location to store your EMR logs in. This log can store EMR metrics and also the metrics/logs for submission of your code.
+
+
+2. **Reference** - You can refer to an even more detailed explanation about all possible options of the `aws emr create-cluster` command at CLI command reference. 
+
+### Exercise: Create an EMR cluster using AWS CLI
+Follow the instructions given below
+
+#### Prerequisite
+
+1. **AWS CLI** - Install AWS CLI on your local computer. Refer to the [AWS instructions to install/update AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html) (version 2) based on your underlying OS.
+
+2. **Set up Access credentials using AWS IAM** - Generate and save a new Access key (access key ID, and a secret key) locally in your system, which will allow your CLI to create an EMR cluster. You will have to configure the environment variables so that the `aws configure` command can run properly.
+
+3. **EC2 Login Key-Pair** - You should have an EC2 login key-pair to access your EC2 instances in the cluster. You can generate a key-pair from the [EC2 dashboard](https://console.aws.amazon.com/ec2/v2/home). Remember, a key-pair is a pair of (encrypted) public and (unencrypted PEM encoded) private keys. The public key is placed automatically on the instance, and the private key is made available to the user, just once. Suppose, your private key file name is AWS_EC2_Demo.pem, then you should use only "AWS_EC2_Demo" in the script below, with the option `--ec2-attributes`.
+
+#### Create An EMR Cluster
+
+1. **Create default roles in IAM** - Before you run the `aws emr create-cluster` command, make sure to have the necessary roles created in your account. Use the following command.
+
+```
+aws emr create-default-roles --profile <profile-name>
+```
+
+2. **Launch your cluster** - Run the script below to launch your cluster. Be sure to replace the appropriate names within the `<>` in the command below.
+
+```
+# Provide cluster name, EC2 private key file name, and profile name
+aws emr create-cluster \
+--name <YOUR_CLUSTER_NAME> \
+--use-default-roles \
+--release-label emr-5.28.0 \
+--instance-count 3 \
+--applications Name=Spark  \
+--ec2-attributes KeyName=<Key-pair-file-name>,SubnetId=<subnet-Id> \
+--instance-type m5.xlarge \
+--auto-terminate \
+--profile <profile-name>
+```
+
+Notice two things in the command above.
+
+- One, we have added the `--auto-terminate` option to terminate the cluster after completing all the steps because EMR clusters are costly. However, you can ignore this option, and [terminate the cluster manually](https://docs.aws.amazon.com/emr/latest/ManagementGuide/UsingEMR_TerminateJobFlow.html) after your job is done.
+- Two, we haven't specified the `--bootstrap-actions` option. This step is optional.
+[Optional] Specify your bootstrap file - You should save an executable (bootstrap_emr.sh file) in an accessible S3 location. You can specify this option as, for example, `--bootstrap-actions Path=s3://mybucket/bootstrap_emr.sh` in the command below. A sample file is provided in the Github repo [here](./scripts/bootstrap_emr.sh).
+
+The expected output should look similar to this:
+
+```
+"ClusterId": "j-4JWRD5WOPN6A",
+"ClusterArn": "arn:aws:elasticmapreduce:us-east-1:265646434158:cluster/j-4JWRD5WOPN6A"
+```
+
+Snapshot:
+
+![](./images/spark-pic7.png)
+
+3. You can either go to [AWS EMR console](https://console.aws.amazon.com/elasticmapreduce/home) from your web browser or run the command below to verify if the cluster is created successfully.
+
+```
+# Provide cluster ID and the profile name
+aws emr describe-cluster --cluster-id <CLUSTER_ID FROM ABOVE> --profile <profile-name>
+
+```
+
+![](./images/spark-pic8.png)
+
+#### Change Security Groups
+
+1. After successfully launching the EMR cluster, the master and core (slave) EC2 instances will launch automatically. Next, we will try to log in to the master EC2 instance on the EMR cluster using the SSH protocol (allows secure remote login). Therefore, you’ll need to enable the Security Groups setting of the master EC2 instance to accept incoming SSH protocol from your local computer.
+
+The master and slave nodes are associated with a separate security group. You can view the security group ID either in the **EMR console** → **Clusters** or you can go to the **EC2 dashboard** → **Security Groups** service, as shown below.
+
+![](./images/spark-pic9.png)
+
+2. Edit the security group to authorize inbound SSH traffic (port 22) from your local computer. 
+
+![](./images/spark-pic10.png)
+
+![](./images/spark-pic11.png)
+
+3. **Reference** - [Authorize inbound traffic](https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-connect-ssh-prereqs.html)
+
+####  Verify connection to the Master node
+1. Go to the EC2 dashboard, and select the instance you want to connect using the SSH protocol.
+
+![](./images/spark-pic12.png)
+
+2. Connect using the SSH protocol. You can run the commands shown in the figure below below in your terminal.
+
+**NOTE** - In the snapshot below, the user name to log in is not `root`. Instead, you must use `hadoop`.
+For example, use 
+```
+ssh -i "spark-cluster.pem" hadoop@ec2-3-235-155-149.compute-1.amazonaws.com
+```
+
+![](./images/spark-pic13.png)
+
+3. Reference - [Connect to the Master Node Using SSH](https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-connect-master-node-ssh.html).
+
+
+#### View Spark UI hosted on the EMR Clusters
+
+One last thing to do before using the Jupyter Notebook, or even browsing the Spark UI, is to set up a proxy in your browser. It is a two-step process. 
+
+**STEP 1 - Set Up an SSH Tunnel to the Master Node Using Dynamic Port Forwarding**
+
+1. Enable the dynamic port forwarding using the command. This command does not returns a response.
+
+```
+ssh -i "spark-cluster.pem" -N -D 8157 hadoop@ec2-3-235-155-149.compute-1.amazonaws.com
+```
+
+_Replace the .pem file name and the master node public DNS for you. In the above example, the .pem is residing in the present working folder. If your .pem is placed in any different folder, you can provide the complete path._
+
+In the command above, the `-D` option is used for specifying a local port (8157) to forward data to all remote ports on the master node's web server.
+
+2. Now, you'd want to copy your .pem file (EC2 log in private key) to the master node. You can securely copy your .pem file from your local computer to the master node, using:
+
+```
+scp -i spark-cluster.pem spark-cluster.pem hadoop@ec2-3-235-155-149.compute-1.amazonaws.com:/home/hadoop/
+```
+
+3. **Reference** - [Set Up an SSH Tunnel to the Master Node Using Dynamic Port Forwarding](https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-ssh-tunnel.html)
+
+**STEP 2 - Configure Proxy Settings in your Local Computer**
+
+To do this, you'll need to install an extension in your browser. Here are the options:
+
+- Chrome - SwitchyOmega or FoxyProxy
+- Firefox - FoxyProxy
+
+The snapshots below present the step for the Firefox browser. For other browsers, you can follow the reference link present at the end of the section.
+
+1. In Firefox, go to https://addons.mozilla.org/, search for FoxyProxy Standard, and follow the instructions to add FoxyProxy to Firefox.
+
+![](./images/spark-pic14.png)
+
+2. Using a text editor, create a JSON file named `foxyproxy-settings.json` from the following example configuration.
+
+```
+{
+  "k20d21508277536715": {
+    "active": true,
+    "address": "localhost",
+    "port": 8157,
+    "username": "",
+    "password": "",
+    "type": 3,
+    "proxyDNS": true,
+    "title": "emr-socks-proxy",
+    "color": "#0055E5",
+    "index": 9007199254740991,
+    "whitePatterns": [
+      {
+        "title": "*ec2*.amazonaws.com*",
+        "active": true,
+        "pattern": "*ec2*.amazonaws.com*",
+        "importedPattern": "*ec2*.amazonaws.com*",
+        "type": 1,
+        "protocols": 1
+      },
+      {
+        "title": "*ec2*.compute*",
+        "active": true,
+        "pattern": "*ec2*.compute*",
+        "importedPattern": "*ec2*.compute*",
+        "type": 1,
+        "protocols": 1
+      },
+      {
+        "title": "10.*",
+        "active": true,
+        "pattern": "10.*",
+        "importedPattern": "http://10.*",
+        "type": 1,
+        "protocols": 2
+      },
+      {
+        "title": "*10*.amazonaws.com*",
+        "active": true,
+        "pattern": "*10*.amazonaws.com*",
+        "importedPattern": "*10*.amazonaws.com*",
+        "type": 1,
+        "protocols": 1
+      },
+      {
+        "title": "*10*.compute*",
+        "active": true,
+        "pattern": "*10*.compute*",
+        "importedPattern": "*10*.compute*",
+        "type": 1,
+        "protocols": 1
+      },
+      {
+        "title": "*.compute.internal*",
+        "active": true,
+        "pattern": "*.compute.internal*",
+        "importedPattern": "*.compute.internal*",
+        "type": 1,
+        "protocols": 1
+      },
+      {
+        "title": "*.ec2.internal* ",
+        "active": true,
+        "pattern": "*.ec2.internal*",
+        "importedPattern": "*.ec2.internal*",
+        "type": 1,
+        "protocols": 1
+      }
+    ],
+    "blackPatterns": []
+  },
+  "logging": {
+    "size": 100,
+    "active": false
+  },
+  "mode": "patterns",
+  "browserVersion": "68.12.0",
+  "foxyProxyVersion": "7.5.1",
+  "foxyProxyEdition": "standard"
+}
+```
+
+3. Open the Firefox **Manage Your Extensions** page (go to **about:addons**, then choose **Extensions**).
+
+4. Choose **FoxyProxy Standard**, then choose the more options button (the button that looks like an ellipsis).
+
+5. Select **Options** from the dropdown.
+
+6. Choose **Import Settings** from the left menu.
+
+7. On the **Import Settings** page, choose **Import Settings** under **Import Settings from FoxyProxy 6.0+**, browse to the location of the `foxyproxy-settings.json` file you created, select the file, and choose Open.
+
+8. Choose **OK** when prompted to overwrite the existing settings and save your new configuration.
+
+9. Once, you have configured the proxy, you can access the Spark UI using the command (replace the master node public DNS for you):
+
+```
+http://ec2-3-235-155-149.compute-1.amazonaws.com:18080/
+```
+
+![](./images/spark-pic15.png)
