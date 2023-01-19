@@ -343,3 +343,21 @@ http://ec2-3-235-155-149.compute-1.amazonaws.com:18080/
 ```
 
 ![](./images/spark-pic15.png)
+
+
+## Jupyter / Zeppelin Notebook
+There are a couple of options for which notebook to use. We can use a Jupyter Notebook, or use a Zeppelin notebook. If you are already familiar with Jupyter Notebooks, continue using them.
+
+### Advantages of using Zeppelin Notebook
+While the use of Jupyter Notebook is common across the industry, you can explore using Zeppelin notebooks. Zeppelin notebooks have been available since EMR 5.x versions, and they have direct access to Spark Context, such as a local spark-shell. For example, if you type sc, you’ll be able to get Spark Context within Zeppelin notebooks.
+
+Zeppelin is very similar to Jupyter Notebook, but if you want to use other languages like Scala or SQL, on top of using Python, you can use Zeppelin instead.
+
+### How to create a notebook on Amazon EMR
+
+1. ![](./images/spark-pic16.png)
+
+2. ![](./images/spark-pic17.png)
+
+3. ![](./images/spark-pic18.png)
+
