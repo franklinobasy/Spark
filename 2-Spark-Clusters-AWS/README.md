@@ -404,6 +404,6 @@ l   ```
   - View your spark UI and refresh the page:
 
   ![](./images/spark-pic19.png)
-  
-  ![](./images/spark-pic19.png)
+
+  ![](./images/spark-pic20.png)
 

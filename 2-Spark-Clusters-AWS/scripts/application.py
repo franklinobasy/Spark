@@ -10,8 +10,11 @@ if __name__ == "__main__":
             .appName("My Spark Application") \
             .getOrCreate()
     
+    # link to file in s3 bucket
     path = "s3://spark-bucket-0001/cities.csv"
 
+    # Load the file from path
     data = session.read.csv(path)
 
+    # view data schema
     data.printSchema()
