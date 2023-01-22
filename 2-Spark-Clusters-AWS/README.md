@@ -407,3 +407,5 @@ l   ```
 
   ![](./images/spark-pic20.png)
 
+## Storing and Retrieving Data on Cloud
+One of the simple ways to store big data in cloud is by using Amazon Simple Storage Service (S3). 
