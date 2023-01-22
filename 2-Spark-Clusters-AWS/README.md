@@ -454,4 +454,82 @@ Although it would make the most sense to use AWS S3 while using other AWS servic
 
 ## Reading and Writing Data to HDFS
 
-1. 
+1. Using the same emr cluster created above, make sure the ssh dynamic port tunnelling i active.
+
+2. Click `Application user interface` tab as shown below:
+
+![](./images/spark-pic25.png)
+
+3. Beside `HDFS Name Node` Application under the `On-cluster application user interface`, copy the `User Interface URL` as shown below:
+
+![](./images/spark-pic26.png)
+
+4. Open the link in a new tab in your browser
+
+![](./images/spark-pic27.png)
+
+5. On the top menu, select `Utilities` -> `Browse the file system`
+
+![](./images/spark-pic28.png)
+
+This is the Amazon emr HDFS. Next, let's see how we can write and read files to the user directory
+
+![](./images/spark-pic29.png)
+
+![](./images/spark-pic30.png)
+
+6. ssh to the emr cluster master node
+
+```
+ssh -i "spark-cluster.pem" hadoop@ec2-3-218-152-215.compute-1.amazonaws.com
+```
+
+![](./images/spark-pic31.png)
+
+7. Download the datasets - [sparkify_log_small.json](./datasets/sparkify_log_small.json) and [sparkify_log_small_2.json](./datasets/sparkify_log_small_2.json) to your local file storage.
+
+Mine is aved in a folder called `datasets`.
+
+Use `scp` command to coppy the download files to the emr cluster master node using the command below:
+
+```
+scp -i spark-cluster.pem datasets/sparkify_log_small*.json hadoop@ec2-3-218-152-215.compute-1.amazonaws.com:/home/hadoop/
+```
+
+8. After copy operation is completed, go back to the emr cluster master node to confirm if the files were sent successfully using the `ls` command.
+
+![](./images/spark-pic32.png)
+
+9. Now that we have the files in the master node, let's move the files to the HDFS.
+
+To keep things organize, we will first create a folder in the HDFS called `sparkify-data`, within the `user` directory. We intend the copt the json files to the newly created `sparkify-data` directory
+
+- To create a directory in the HDFS, use the command
+  ```
+  hdfs dfs -mkdir /user/sparkify-data
+  ```
+
+![](./images/spark-pic33.png)
+
+- Copy the json files to the `sparkify-data` using the command:
+```
+hdfs dfs -copyFromLocal sparkify_log_small*.json /user/sparkify-data/
+```
+
+![](./images/spark-pic34.png)
+
+We have successfully written file to the HDFS.
+
+10. Using spark, we can read data from the HDFS using a url to follows this format:
+
+```
+hdfs:///<path>/filename
+```
+
+for example the url to the json file can be written as:
+
+```
+hdfs:///user/sparkify_data/sparkify_log_small_2.json
+```
+
+See the codes [here](./scripts/test-emr.ipynb)
