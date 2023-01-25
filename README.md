@@ -10,9 +10,11 @@ Use this guide to setup your OS for pyspark - [here](https://sparkbyexamples.com
 
 ## Contents
 
-1. [Functional Programming and Data Wrangling in Spark](https://github.com/franklinobasy/Spark/tree/master/1-Functional-Programming-Data_Wrangling-Spark)
+1. [Functional Programming and Data Wrangling in Spark](./1-Functional-Programming-Data_Wrangling-Spark)
 
-2. [Setting Up Spark Clusters with AWS](https://github.com/franklinobasy/Spark/tree/master/2-Spark-Clusters-AWS)
-
+2. [Setting Up Spark Clusters with AWS](./2-Spark-Clusters-AWS)
 
 3. [Debugging And Optimization](./3-Debugging-Optimization/)
+
+4. [Machine Learning with Spark](./4-Machine-Learning-with-Spark/)
+
