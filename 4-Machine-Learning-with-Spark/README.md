@@ -59,3 +59,29 @@ Spark supports many different scaling approaches:
 - [VectorIndexer](https://spark.apache.org/docs/latest/ml-features.html#vectorindexer)
 
 see an example - [here](notebooks/1_numeric_features.ipynb)
+
+
+### Supervised ML Algorithms
+
+Spark supports the most common algorithms for binary and multiclass classificaton such as :
+
+- Logistic regression
+- Random forest
+- Gradient-boosted trees
+- Support vector machines
+- Naive bayes
+
+For regression, park has builtin methods for:
+
+- Linear regression
+- Generalized linear regression
+- Tree-based regression
+
+### Unsupervised Learning
+
+The second big category in ML is unsupervised algorithms, where we don't have any labeled data points. We typicalllytry to find clusters based on how similar records are to one another. The spark ML API inclueds
+- K-means
+- latent dirichlet Allocation
+- Gaussian Mixture Model
+
+In real life, problems don't necessarily fit strictly in either supervised or unsupervised category. So there has been a lot of development on techniques that implement hybrid approaches. Spark at this point haas limited support for `semi-supervied learning`. As mentioned earlier, spark primarily supports algorithms that scale linearly with the number of records. So if you need to use more expensive algorithms like connective-based clustering, which typically scales quadratically or even cubic with the number of records, You need to implement your own methods or consider using some other frameworks.
