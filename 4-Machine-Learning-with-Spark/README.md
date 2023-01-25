@@ -58,4 +58,4 @@ Spark supports many different scaling approaches:
 - [IndexToString](https://spark.apache.org/docs/latest/ml-features.html#indextostring)
 - [VectorIndexer](https://spark.apache.org/docs/latest/ml-features.html#vectorindexer)
 
-
+see an example - [here](notebooks/1_numeric_features.ipynb)
