@@ -85,3 +85,41 @@ The second big category in ML is unsupervised algorithms, where we don't have an
 - Gaussian Mixture Model
 
 In real life, problems don't necessarily fit strictly in either supervised or unsupervised category. So there has been a lot of development on techniques that implement hybrid approaches. Spark at this point haas limited support for `semi-supervied learning`. As mentioned earlier, spark primarily supports algorithms that scale linearly with the number of records. So if you need to use more expensive algorithms like connective-based clustering, which typically scales quadratically or even cubic with the number of records, You need to implement your own methods or consider using some other frameworks.
+
+code examples - [here](notebooks/ml_with_spark.ipynb)
+
+### Machine Learning Pipelines
+
+Spark ML Pipeline API was inspired by Scikit-Learn, and just like scikit-learn, it allows combining several dataprocessing and other training steps into a single workflow.
+Workflow Pipelines have two main components:
+1. Transformers
+2. Estimators
+
+The **`transformer`** is an algorithm that transforms one dataframe to another. There are two common places where transformers are used:
+1. Feature transformation
+2. Tranforming features using a model into predicted outcomes.
+
+**`Estimators`** fit algorithm parameters on a dataframe to create a transformer.
+
+![](./images/sparkpipe1.png)
+
+A **`Pipeline`** chains multiple transformers and estimators together to create an ML workflow.
+
+![](./images/sparkpipe2.png)
+
+### Model Selection and Tuning
+
+Spark allows **`Hyperparameter tuning`** through both:
+- Single Train-Test split
+- K-flod cross validation
+
+We can tune a single estimator or a whole pipeline by specifiying two additional objects:
+
+1. Parameter grid
+2. Evaluator
+
+![](./images/sparkpipe3.png)
+
+Estimators define the metric that will be used to evaluate the results on the test set.
+
+It is worth noting that after identifying the best parametercombination using the built-in cross validation methods, spark fits the estimators using the best parameter map and the entire dataset.
